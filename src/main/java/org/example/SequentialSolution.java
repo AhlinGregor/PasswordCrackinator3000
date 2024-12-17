@@ -1,14 +1,12 @@
 package org.example;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 
 public class SequentialSolution {
-    private static String smallAlpha = "abcdefghijklmnopqrstuvwxyz";
-    private static String bigAlpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    private static char[] nonAlphabeticalCharacters = {
+    private final static String smallAlpha = "abcdefghijklmnopqrstuvwxyz";
+    private final static String bigAlpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private final static char[] nonAlphabeticalCharacters = {
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',  // Digits
             '!', '@', '#', '$', '%', '^', '&', '*', '(', ')',   // Symbols
             '-', '_', '=', '+', '[', ']', '{', '}', '\\', '|',  // Brackets and slashes
@@ -19,61 +17,48 @@ public class SequentialSolution {
 
 
     public static String computeDizShiz(String hash, boolean md5, int opt, int length) {
-        if (!isValidMD5(hash)) {
-            return null;
-        }
+        if (md5) {
+            if (!isValidMD5(hash)) {
+                return null;
+            }
 
-        String available;
-        switch (opt) {
-            case 1:
-                available = SequentialSolution.smallAlpha;
-                break;
-            case 2:
-                available = SequentialSolution.bigAlpha;
-                break;
-            case 3:
-                available = SequentialSolution.smallAlpha + SequentialSolution.bigAlpha;
-                break;
-            case 4:
-                available = SequentialSolution.nonAlphaString;
-                break;
-            case 5:
-                available = SequentialSolution.smallAlpha + SequentialSolution.nonAlphaString;
-                break;
-            case 6:
-                available = SequentialSolution.bigAlpha + SequentialSolution.nonAlphaString;
-                break;
-            default:
-                available = SequentialSolution.smallAlpha + SequentialSolution.bigAlpha + SequentialSolution.nonAlphaString;
-                break;
-        }
+            String available = switch (opt) {
+                case 1 -> SequentialSolution.smallAlpha;
+                case 2 -> SequentialSolution.bigAlpha;
+                case 3 -> SequentialSolution.smallAlpha + SequentialSolution.bigAlpha;
+                case 4 -> SequentialSolution.nonAlphaString;
+                case 5 -> SequentialSolution.smallAlpha + SequentialSolution.nonAlphaString;
+                case 6 -> SequentialSolution.bigAlpha + SequentialSolution.nonAlphaString;
+                default -> SequentialSolution.smallAlpha + SequentialSolution.bigAlpha + SequentialSolution.nonAlphaString;
+            };
 
-        // Generate permutations dynamically to avoid memory overhead
-        return findMatchingPermutation(hash, available, md5, length);
+            // Generate permutations dynamically to avoid memory overhead
+            return findMatchingPermutation(hash, available, length);
+        }
+        else return null;
     }
 
-    private static String findMatchingPermutation(String hash, String available, boolean md5, int maxLength) {
-        return findMatchingPermutationHelper(hash, available, "", md5, maxLength);
+    private static String findMatchingPermutation(String hash, String available, int maxLength) {
+        return findMatchingPermutationHelper(hash, available, "", maxLength);
     }
 
-    private static String findMatchingPermutationHelper(String hash, String str, String prefix, boolean md5, int maxLength) {
+    private static String findMatchingPermutationHelper(String hash, String str, String prefix, int maxLength) {
         // Base case: Check if prefix matches the hash
         if (!prefix.isEmpty() && prefix.length() <= maxLength) {
-            if (md5) {
-                try {
-                    MessageDigest md = MessageDigest.getInstance("MD5");
-                    byte[] digest = md.digest(prefix.getBytes("UTF-8"));
-                    StringBuilder sb = new StringBuilder();
-                    for (byte b : digest) {
-                        sb.append(String.format("%02x", b));
-                    }
-                    if (sb.toString().equals(hash)) {
-                        return prefix;
-                    }
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+            try {
+                MessageDigest md = MessageDigest.getInstance("MD5");
+                byte[] digest = md.digest(prefix.getBytes(StandardCharsets.UTF_8));
+                StringBuilder sb = new StringBuilder();
+                for (byte b : digest) {
+                    sb.append(String.format("%02x", b));
                 }
+                if (sb.toString().equals(hash)) {
+                    return prefix;
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
+
         }
 
         // Stop recursion if prefix length exceeds maxLength
@@ -83,7 +68,7 @@ public class SequentialSolution {
 
         // Recursive case: Generate permutations dynamically
         for (int i = 0; i < str.length(); i++) {
-            String result = findMatchingPermutationHelper(hash, str, prefix + str.charAt(i), md5, maxLength);
+            String result = findMatchingPermutationHelper(hash, str, prefix + str.charAt(i), maxLength);
             if (result != null) {
                 return result; // Early stopping
             }

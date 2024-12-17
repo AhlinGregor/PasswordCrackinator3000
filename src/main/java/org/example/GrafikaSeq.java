@@ -2,8 +2,6 @@ package org.example;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class GrafikaSeq {
     public static void createAndShowGUI() {
@@ -55,35 +53,32 @@ public class GrafikaSeq {
 
         // Add a button
         JButton button = new JButton("Submit");
-        button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Get text from the text field
-                String text = textField.getText();
+        button.addActionListener(e -> {
+            // Get text from the text field
+            String text = textField.getText();
 
-                // Get selected radio button
-                boolean md5Selected = md5.isSelected();
+            // Get selected radio button
+            boolean md5Selected = md5.isSelected();
 
-                // Get selected checkboxes
-                int selectedCheckboxes = 0;
-                if (small.isSelected()) {
-                    selectedCheckboxes += 1;
-                }
-                if (big.isSelected()) {
-                    selectedCheckboxes += 2;
-                }
-                if (nonAlpha.isSelected()) {
-                    selectedCheckboxes += 4;
-                }
-
-                // Get selected integer from the combo box
-                int selectedInteger = (int) spinner.getValue();
-
-                long start = System.currentTimeMillis();
-                String resitev = SequentialSolution.computeDizShiz(text, md5Selected, selectedCheckboxes, selectedInteger);
-                long end = System.currentTimeMillis();
-                System.out.println("Resitev je: \'" + resitev + "\' in porablo je " + (end - start) + "ms");
+            // Get selected checkboxes
+            int selectedCheckboxes = 0;
+            if (small.isSelected()) {
+                selectedCheckboxes += 1;
             }
+            if (big.isSelected()) {
+                selectedCheckboxes += 2;
+            }
+            if (nonAlpha.isSelected()) {
+                selectedCheckboxes += 4;
+            }
+
+            // Get selected integer from the spinner
+            int selectedInteger = (int) spinner.getValue();
+
+            long start = System.currentTimeMillis();
+            String resitev = SequentialSolution.computeDizShiz(text, md5Selected, selectedCheckboxes, selectedInteger);
+            long end = System.currentTimeMillis();
+            System.out.println("Resitev je: '" + resitev + "' in porablo je " + (end - start) + "ms");
         });
         panel.add(button);
 
