@@ -17,6 +17,7 @@ public class SequentialSolution {
     };
     public static String nonAlphaString = new String(nonAlphabeticalCharacters);
 
+
     public static String computeDizShiz(String hash, boolean md5, int opt, int length) {
         String available;
         switch (opt) {
@@ -43,66 +44,47 @@ public class SequentialSolution {
                 break;
         }
 
-        ArrayList<String> permutacije = generatePermutations(available, length);
+        // Generate permutations dynamically to avoid memory overhead
+        return findMatchingPermutation(hash, available, md5, length);
+    }
 
-        if (md5) {
-            for (int i = 0; i < permutacije.size(); i++) {
-                byte[] bytesOfMessage = null;
+    private static String findMatchingPermutation(String hash, String available, boolean md5, int maxLength) {
+        return findMatchingPermutationHelper(hash, available, "", md5, maxLength);
+    }
+
+    private static String findMatchingPermutationHelper(String hash, String str, String prefix, boolean md5, int maxLength) {
+        // Base case: Check if prefix matches the hash
+        if (!prefix.isEmpty() && prefix.length() <= maxLength) {
+            if (md5) {
                 try {
-                    bytesOfMessage = permutacije.get(i).getBytes("UTF-8");
-                } catch (UnsupportedEncodingException e) {
+                    MessageDigest md = MessageDigest.getInstance("MD5");
+                    byte[] digest = md.digest(prefix.getBytes("UTF-8"));
+                    StringBuilder sb = new StringBuilder();
+                    for (byte b : digest) {
+                        sb.append(String.format("%02x", b));
+                    }
+                    if (sb.toString().equals(hash)) {
+                        return prefix;
+                    }
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
+            }
+        }
 
-                MessageDigest md = null;
-                try {
-                    md = MessageDigest.getInstance("MD5");
-                } catch (NoSuchAlgorithmException e) {
-                    throw new RuntimeException(e);
-                }
-                byte[] theMD5digest = md.digest(bytesOfMessage);
-                String rez = new String(theMD5digest);
+        // Stop recursion if prefix length exceeds maxLength
+        if (prefix.length() >= maxLength) {
+            return null;
+        }
 
-                if (rez.equals(hash)) return permutacije.get(i);
+        // Recursive case: Generate permutations dynamically
+        for (int i = 0; i < str.length(); i++) {
+            String result = findMatchingPermutationHelper(hash, str, prefix + str.charAt(i), md5, maxLength);
+            if (result != null) {
+                return result; // Early stopping
             }
         }
         return null;
     }
 
-    /**
-     * Generates all permutations of a string from length 1 to maxLength, allowing repetition of characters.
-     * @param str The input string
-     * @param maxLength The maximum length of permutations to generate
-     * @return A list of all permutations
-     */
-    public static ArrayList<String> generatePermutations(String str, int maxLength) {
-        ArrayList<String> result = new ArrayList<>();
-        generatePermutationsHelper(str, "", result, maxLength);
-        return result;
-    }
-
-    /**
-     * Helper method to recursively generate permutations with repeated characters allowed.
-     * @param str The original character set
-     * @param prefix The current prefix (partial permutation)
-     * @param result The list to store results
-     * @param maxLength The maximum length of permutations
-     */
-    private static void generatePermutationsHelper(String str, String prefix, ArrayList<String> result, int maxLength) {
-        // Add the current prefix to the result if its length is within the range
-        if (!prefix.isEmpty() && prefix.length() <= maxLength) {
-            result.add(prefix);
-        }
-
-        // Base case: Stop recursion if prefix length reaches maxLength
-        if (prefix.length() >= maxLength) {
-            return;
-        }
-
-        // Recursive case: Iterate over all characters, allowing repetition
-        for (int i = 0; i < str.length(); i++) {
-            char ch = str.charAt(i); // Current character
-            generatePermutationsHelper(str, prefix + ch, result, maxLength); // Allow repetition by passing the full string
-        }
-    }
 }
