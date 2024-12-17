@@ -19,6 +19,10 @@ public class SequentialSolution {
 
 
     public static String computeDizShiz(String hash, boolean md5, int opt, int length) {
+        if (!isValidMD5(hash)) {
+            return null;
+        }
+
         String available;
         switch (opt) {
             case 1:
@@ -87,4 +91,11 @@ public class SequentialSolution {
         return null;
     }
 
+    public static boolean isValidMD5(String input) {
+        if (input == null || input.length() != 32) {
+            return false;
+        }
+
+        return input.matches("[a-fA-F0-9]{32}");
+    }
 }

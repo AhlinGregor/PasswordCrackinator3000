@@ -46,10 +46,12 @@ public class GrafikaSeq {
         panel.add(new JLabel("Select options:"));
         panel.add(checkboxPanel);
 
-        // Add an integer menu
-        JComboBox<Integer> dolzina = new JComboBox<>(new Integer[]{1, 2, 3, 4, 5});
+        //add length chooser
+        SpinnerNumberModel model = new SpinnerNumberModel(5, 1, 16, 1);
+        JSpinner spinner = new JSpinner(model);
+
         panel.add(new JLabel("Length:"));
-        panel.add(dolzina);
+        panel.add(spinner);
 
         // Add a button
         JButton button = new JButton("Submit");
@@ -75,7 +77,7 @@ public class GrafikaSeq {
                 }
 
                 // Get selected integer from the combo box
-                int selectedInteger = (int) dolzina.getSelectedItem();
+                int selectedInteger = (int) spinner.getValue();
 
                 long start = System.currentTimeMillis();
                 String resitev = SequentialSolution.computeDizShiz(text, md5Selected, selectedCheckboxes, selectedInteger);
