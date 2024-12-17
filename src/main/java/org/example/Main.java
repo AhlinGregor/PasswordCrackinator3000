@@ -18,10 +18,10 @@ public class Main {
         GrafikaSeq.createAndShowGUI();
 
     }
-
+/*
     public static void sequentialSollution() {
         GrafikaSeq.createAndShowGUI();
     }
     public static void parallelSollution() {}
-    public static void cudaSollution() {}
+    public static void cudaSollution() {}*/
 }

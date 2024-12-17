@@ -2,17 +2,18 @@ package org.example;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 
 public class GrafikaSeq {
     public static void createAndShowGUI() {
         // Create the main frame
         JFrame frame = new JFrame("GrafikaSeq GUI");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(400, 400);
+        frame.setSize(400, 200);
 
         // Create a panel to hold all components
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(6, 1)); // 6 rows for the components
+        panel.setLayout(new GridLayout(5, 2)); // 6 rows for the components
 
         // Add a text input field
         JTextField textField = new JTextField(20);
@@ -55,7 +56,7 @@ public class GrafikaSeq {
         JButton button = new JButton("Submit");
         button.addActionListener(e -> {
             // Get text from the text field
-            String text = textField.getText();
+            String hash = textField.getText();
 
             // Get selected radio button
             boolean md5Selected = md5.isSelected();
@@ -76,11 +77,38 @@ public class GrafikaSeq {
             int selectedInteger = (int) spinner.getValue();
 
             long start = System.currentTimeMillis();
-            String resitev = SequentialSolution.computeDizShiz(text, md5Selected, selectedCheckboxes, selectedInteger);
+            String resitev = SequentialSolution.computeDizShiz(hash, md5Selected, selectedCheckboxes, selectedInteger);
             long end = System.currentTimeMillis();
             System.out.println("Resitev je: '" + resitev + "' in porablo je " + (end - start) + "ms");
         });
         panel.add(button);
+
+        JButton chooseFile = new JButton("Dictionary");
+        chooseFile.addActionListener(e -> {
+            // Get text from the text field
+            String hash = textField.getText();
+
+            // Get selected radio button
+            boolean md5Selected = md5.isSelected();
+
+            JFileChooser fileChooser = new JFileChooser();
+            int result = fileChooser.showOpenDialog(panel);
+
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File file = fileChooser.getSelectedFile();
+
+                // Check if it's a .txt file
+                if (file.getName().endsWith(".txt")) {
+                    long start = System.currentTimeMillis();
+                    String resitev = SequentialSolution.dictionaryAttack(file, hash,  md5Selected);
+                    long end = System.currentTimeMillis();
+                    System.out.println("Resitev je: '" + resitev + "' in porablo je " + (end - start) + "ms");
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Please select a .txt file", "Invalid File", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+        panel.add(chooseFile);
 
         // Add the panel to the frame
         frame.add(panel);

@@ -1,7 +1,13 @@
 package org.example;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Formatter;
 
 public class SequentialSolution {
     private final static String smallAlpha = "abcdefghijklmnopqrstuvwxyz";
@@ -83,4 +89,43 @@ public class SequentialSolution {
 
         return input.matches("[a-fA-F0-9]{32}");
     }
+
+    public static String dictionaryAttack(File file, String hash, boolean md5) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (md5) {
+                    String lineHash = computeMD5Hash(line);
+                    if (lineHash.equals(hash)) return line;
+                }
+            }
+        } catch (IOException ex) {
+            System.err.println("Error reading the file: " + ex.getMessage());
+        }
+        return null;
+    }
+
+    // Helper method to convert a byte array to a hex string
+    private static String byteArrayToHexString(byte[] bytes) {
+        Formatter formatter = new Formatter();
+        for (byte b : bytes) {
+            formatter.format("%02x", b);
+        }
+        String hexString = formatter.toString();
+        formatter.close();
+        return hexString;
+    }
+
+    // Helper method to compute the MD5 hash of a given string
+    private static String computeMD5Hash(String input) {
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("MD5");
+            byte[] hashBytes = md.digest(input.getBytes());
+            return byteArrayToHexString(hashBytes);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
