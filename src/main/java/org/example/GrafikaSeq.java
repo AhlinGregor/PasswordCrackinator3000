@@ -76,6 +76,7 @@ public class GrafikaSeq {
                 progressBar.setStringPainted(true);
                 progressBar.setMaximum((int) totalCombinations);
 
+                long start = System.currentTimeMillis();
                 String result = SequentialSolution.computeDizShiz(
                         hash,
                         md5Selected,
@@ -84,13 +85,14 @@ public class GrafikaSeq {
                         progressBar,
                         totalCombinations
                 );
+                long stop = System.currentTimeMillis();
 
                 // Show the result in a new window
                 SwingUtilities.invokeLater(() -> {
                     if (result != null) {
                         JOptionPane.showMessageDialog(
                                 frame,
-                                "Solution Found: " + result,
+                                "Solution Found: " + result + "\n Time to crack: " + (stop-start) + "ms",
                                 "Result",
                                 JOptionPane.INFORMATION_MESSAGE
                         );
@@ -124,9 +126,31 @@ public class GrafikaSeq {
                 // Check if it's a .txt file
                 if (file.getName().endsWith(".txt")) {
                     long start = System.currentTimeMillis();
-                    String resitev = SequentialSolution.dictionaryAttack(file, hash,  md5Selected);
-                    long end = System.currentTimeMillis();
-                    System.out.println("Resitev je: '" + resitev + "' in porablo je " + (end - start) + "ms");
+                    String resitev = SequentialSolution.dictionaryAttack(
+                            file,
+                            hash,
+                            md5Selected
+                    );
+                    long stop = System.currentTimeMillis();
+
+                    // Show the result in a new window
+                    SwingUtilities.invokeLater(() -> {
+                        if (resitev != null) {
+                            JOptionPane.showMessageDialog(
+                                    frame,
+                                    "Solution Found: " + resitev + "\n Time to crack: " + (stop-start) + "ms",
+                                    "Result",
+                                    JOptionPane.INFORMATION_MESSAGE
+                            );
+                        } else {
+                            JOptionPane.showMessageDialog(
+                                    frame,
+                                    "No solution was found.",
+                                    "Result",
+                                    JOptionPane.WARNING_MESSAGE
+                            );
+                        }
+                    });
                 } else {
                     JOptionPane.showMessageDialog(frame, "Please select a .txt file", "Invalid File", JOptionPane.ERROR_MESSAGE);
                 }
