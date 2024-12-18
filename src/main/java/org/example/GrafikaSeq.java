@@ -52,34 +52,58 @@ public class GrafikaSeq {
         panel.add(new JLabel("Length:"));
         panel.add(spinner);
 
+        // Add a progres bar
+        JProgressBar progressBar = new JProgressBar(0, 100);
+        progressBar.setValue(0);
+        progressBar.setStringPainted(true);
+
         // Add a button
         JButton button = new JButton("Submit");
         button.addActionListener(e -> {
-            // Get text from the text field
-            String hash = textField.getText();
+            progressBar.setValue(0); // Reset progress bar
 
-            // Get selected radio button
-            boolean md5Selected = md5.isSelected();
+            new Thread(() -> {
+                String hash = textField.getText();
+                boolean md5Selected = md5.isSelected();
+                int selectedCheckboxes = (small.isSelected() ? 1 : 0) + (big.isSelected() ? 2 : 0) + (nonAlpha.isSelected() ? 4 : 0);
+                int selectedInteger = (int) spinner.getValue();
 
-            // Get selected checkboxes
-            int selectedCheckboxes = 0;
-            if (small.isSelected()) {
-                selectedCheckboxes += 1;
-            }
-            if (big.isSelected()) {
-                selectedCheckboxes += 2;
-            }
-            if (nonAlpha.isSelected()) {
-                selectedCheckboxes += 4;
-            }
+                // Calculate total combinations
+                String available = SequentialSolution.getCharacterSet(selectedCheckboxes);
+                long totalCombinations = SequentialSolution.calculateTotalCombinations(available.length(), selectedInteger);
 
-            // Get selected integer from the spinner
-            int selectedInteger = (int) spinner.getValue();
+                // Update progress bar's text format
+                progressBar.setStringPainted(true);
+                progressBar.setMaximum((int) totalCombinations);
 
-            long start = System.currentTimeMillis();
-            String resitev = SequentialSolution.computeDizShiz(hash, md5Selected, selectedCheckboxes, selectedInteger);
-            long end = System.currentTimeMillis();
-            System.out.println("Resitev je: '" + resitev + "' in porablo je " + (end - start) + "ms");
+                String result = SequentialSolution.computeDizShiz(
+                        hash,
+                        md5Selected,
+                        selectedCheckboxes,
+                        selectedInteger,
+                        progressBar,
+                        totalCombinations
+                );
+
+                // Show the result in a new window
+                SwingUtilities.invokeLater(() -> {
+                    if (result != null) {
+                        JOptionPane.showMessageDialog(
+                                frame,
+                                "Solution Found: " + result,
+                                "Result",
+                                JOptionPane.INFORMATION_MESSAGE
+                        );
+                    } else {
+                        JOptionPane.showMessageDialog(
+                                frame,
+                                "No solution was found.",
+                                "Result",
+                                JOptionPane.WARNING_MESSAGE
+                        );
+                    }
+                });
+            }).start();
         });
         panel.add(button);
 
@@ -109,6 +133,8 @@ public class GrafikaSeq {
             }
         });
         panel.add(chooseFile);
+
+        frame.add(progressBar, BorderLayout.SOUTH);
 
         // Add the panel to the frame
         frame.add(panel);

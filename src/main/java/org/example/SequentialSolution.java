@@ -1,5 +1,6 @@
 package org.example;
 
+import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -22,33 +23,33 @@ public class SequentialSolution {
     public static String nonAlphaString = new String(nonAlphabeticalCharacters);
 
 
-    public static String computeDizShiz(String hash, boolean md5, int opt, int length) {
+    public static String computeDizShiz(String hash, boolean md5, int opt, int length, JProgressBar progressBar, long totalCombinations) {
         if (md5) {
             if (!isValidMD5(hash)) {
                 return null;
             }
 
-            String available = switch (opt) {
-                case 1 -> SequentialSolution.smallAlpha;
-                case 2 -> SequentialSolution.bigAlpha;
-                case 3 -> SequentialSolution.smallAlpha + SequentialSolution.bigAlpha;
-                case 4 -> SequentialSolution.nonAlphaString;
-                case 5 -> SequentialSolution.smallAlpha + SequentialSolution.nonAlphaString;
-                case 6 -> SequentialSolution.bigAlpha + SequentialSolution.nonAlphaString;
-                default -> SequentialSolution.smallAlpha + SequentialSolution.bigAlpha + SequentialSolution.nonAlphaString;
-            };
+            String available = getCharacterSet(opt);
 
             // Generate permutations dynamically to avoid memory overhead
-            return findMatchingPermutation(hash, available, length);
+            return findMatchingPermutation(hash, available, length, progressBar, totalCombinations);
         }
-        else return null;
+        return null;
     }
 
-    private static String findMatchingPermutation(String hash, String available, int maxLength) {
-        return findMatchingPermutationHelper(hash, available, "", maxLength);
+    public static long calculateTotalCombinations(int charsetLength, int maxLength) {
+        long total = 0;
+        for (int i = 1; i <= maxLength; i++) {
+            total += Math.pow(charsetLength, i);
+        }
+        return total;
     }
 
-    private static String findMatchingPermutationHelper(String hash, String str, String prefix, int maxLength) {
+    private static String findMatchingPermutation(String hash, String available, int maxLength, JProgressBar progressBar, long totalCombinations) {
+        return findMatchingPermutationHelper(hash, available, "", maxLength, progressBar, totalCombinations, new long[]{0});
+    }
+
+    private static String findMatchingPermutationHelper(String hash, String str, String prefix, int maxLength, JProgressBar progressBar, long totalCombinations, long[] currentProgress) {
         // Base case: Check if prefix matches the hash
         if (!prefix.isEmpty() && prefix.length() <= maxLength) {
             try {
@@ -59,6 +60,8 @@ public class SequentialSolution {
                     sb.append(String.format("%02x", b));
                 }
                 if (sb.toString().equals(hash)) {
+                    progressBar.setValue((int) currentProgress[0]); // If success set pb to 100%
+                    progressBar.setString(currentProgress[0] + "/" + totalCombinations);
                     return prefix;
                 }
             } catch (Exception e) {
@@ -74,7 +77,13 @@ public class SequentialSolution {
 
         // Recursive case: Generate permutations dynamically
         for (int i = 0; i < str.length(); i++) {
-            String result = findMatchingPermutationHelper(hash, str, prefix + str.charAt(i), maxLength);
+            currentProgress[0]++;
+            SwingUtilities.invokeLater(() -> {
+                progressBar.setValue((int) currentProgress[0]);
+                progressBar.setString(currentProgress[0] + "/" + totalCombinations);
+            });
+
+            String result = findMatchingPermutationHelper(hash, str, prefix + str.charAt(i), maxLength, progressBar, totalCombinations, currentProgress);
             if (result != null) {
                 return result; // Early stopping
             }
@@ -128,4 +137,15 @@ public class SequentialSolution {
         }
     }
 
+    public static String getCharacterSet(int opt) {
+        return switch (opt) {
+            case 1 -> SequentialSolution.smallAlpha;
+            case 2 -> SequentialSolution.bigAlpha;
+            case 3 -> SequentialSolution.smallAlpha + SequentialSolution.bigAlpha;
+            case 4 -> SequentialSolution.nonAlphaString;
+            case 5 -> SequentialSolution.smallAlpha + SequentialSolution.nonAlphaString;
+            case 6 -> SequentialSolution.bigAlpha + SequentialSolution.nonAlphaString;
+            default -> SequentialSolution.smallAlpha + SequentialSolution.bigAlpha + SequentialSolution.nonAlphaString;
+        };
+    }
 }
