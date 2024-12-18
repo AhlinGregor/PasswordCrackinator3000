@@ -1,4 +1,4 @@
-This is a Java Brute Force Password Cracked. It is my project for the Programming 3 course.
+This is a Java Brute Force Password Cracker. It is my project for the Programming 3 course.
 It implements 3 solutions:
   - sequential solution
   - parallel solution
