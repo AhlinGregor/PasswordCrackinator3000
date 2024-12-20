@@ -24,17 +24,22 @@ public class SequentialSolution {
 
 
     public static String computeDizShiz(String hash, boolean md5, int opt, int length, JProgressBar progressBar, long totalCombinations) {
+        String available = getCharacterSet(opt);
         if (md5) {
-            if (!isValidMD5(hash)) {
-                return null;
-            }
+            if (!isValidMD5(hash)) return null;
 
-            String available = getCharacterSet(opt);
+            // Big daddy method for md5
+            return findMatchingPermutationMD(hash, available, length, progressBar, totalCombinations);
+        } else {
+            if (!isValidSHA(hash)) return null;
 
-            // Generate permutations dynamically to avoid memory overhead
-            return findMatchingPermutation(hash, available, length, progressBar, totalCombinations);
+            // Big daddy method for sha-256
+            return findMatchingPermutationSHA(hash, available, length, progressBar, totalCombinations);
         }
-        return null;
+    }
+
+    private static boolean isValidSHA(String input) {
+        return input != null && input.matches("^[a-fA-F0-9]{64}$"); //"Yayy! Regex!" said he, sarcastically
     }
 
     public static long calculateTotalCombinations(int charsetLength, int maxLength) {
@@ -45,11 +50,62 @@ public class SequentialSolution {
         return total;
     }
 
-    private static String findMatchingPermutation(String hash, String available, int maxLength, JProgressBar progressBar, long totalCombinations) {
-        return findMatchingPermutationHelper(hash, available, "", maxLength, progressBar, totalCombinations, new long[]{0});
+    private static String findMatchingPermutationSHA(String hash, String available, int maxLength, JProgressBar progressBar, long totalCombinations) {
+        return findMatchingPermutationSHAHelper(hash, available, "", maxLength, progressBar, totalCombinations, new long[]{0});
     }
 
-    private static String findMatchingPermutationHelper(String hash, String str, String prefix, int maxLength, JProgressBar progressBar, long totalCombinations, long[] currentProgress) {
+    private static String findMatchingPermutationSHAHelper(String hash, String str, String prefix, int maxLength, JProgressBar progressBar, long totalCombinations, long[] currentProgress) {
+        // Base case: Check if prefix matches the hash
+        if (!prefix.isEmpty() && prefix.length() <= maxLength) {
+            try {
+                MessageDigest md = MessageDigest.getInstance("SHA-256");
+                byte[] digest = md.digest(prefix.getBytes(StandardCharsets.UTF_8));
+                StringBuilder sb = new StringBuilder();
+                for (byte b : digest) {
+                    //sb.append(String.format("%02x", b));
+                    String hex = Integer.toHexString(0xff & b);
+                    if (hex.length() == 1) {
+                        sb.append('0');
+                    }
+                    sb.append(hex);
+                }
+                if (sb.toString().equals(hash)) {
+                    progressBar.setValue((int) currentProgress[0]); // If success set pb to 100%
+                    progressBar.setString(currentProgress[0] + "/" + totalCombinations);
+                    return prefix;
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+
+        // Stop recursion if prefix length exceeds maxLength
+        if (prefix.length() >= maxLength) {
+            return null;
+        }
+
+        // Recursive case: Generate permutations dynamically
+        for (int i = 0; i < str.length(); i++) {
+            currentProgress[0]++;
+            SwingUtilities.invokeLater(() -> {
+                progressBar.setValue((int) currentProgress[0]);
+                progressBar.setString(currentProgress[0] + "/" + totalCombinations);
+            });
+
+            String result = findMatchingPermutationSHAHelper(hash, str, prefix + str.charAt(i), maxLength, progressBar, totalCombinations, currentProgress);
+            if (result != null) {
+                return result; // Early stopping
+            }
+        }
+        return null;
+    }
+
+    private static String findMatchingPermutationMD(String hash, String available, int maxLength, JProgressBar progressBar, long totalCombinations) {
+        return findMatchingPermutationMDHelper(hash, available, "", maxLength, progressBar, totalCombinations, new long[]{0});
+    }
+
+    private static String findMatchingPermutationMDHelper(String hash, String str, String prefix, int maxLength, JProgressBar progressBar, long totalCombinations, long[] currentProgress) {
         // Base case: Check if prefix matches the hash
         if (!prefix.isEmpty() && prefix.length() <= maxLength) {
             try {
@@ -83,7 +139,7 @@ public class SequentialSolution {
                 progressBar.setString(currentProgress[0] + "/" + totalCombinations);
             });
 
-            String result = findMatchingPermutationHelper(hash, str, prefix + str.charAt(i), maxLength, progressBar, totalCombinations, currentProgress);
+            String result = findMatchingPermutationMDHelper(hash, str, prefix + str.charAt(i), maxLength, progressBar, totalCombinations, currentProgress);
             if (result != null) {
                 return result; // Early stopping
             }
@@ -96,7 +152,7 @@ public class SequentialSolution {
             return false;
         }
 
-        return input.matches("[a-fA-F0-9]{32}");
+        return input.matches("[a-fA-F0-9]{32}"); // The bane of my existence yet again
     }
 
     public static String dictionaryAttack(File file, String hash, boolean md5) {
@@ -106,12 +162,26 @@ public class SequentialSolution {
                 if (md5) {
                     String lineHash = computeMD5Hash(line);
                     if (lineHash.equals(hash)) return line;
+                } else {
+                    String lineHash = computeSHA256Hash(line);
+                    if (lineHash.equals(hash)) return line;
                 }
             }
         } catch (IOException ex) {
             System.err.println("Error reading the file: " + ex.getMessage());
         }
         return null;
+    }
+
+    private static String computeSHA256Hash(String input) {
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = md.digest(input.getBytes());
+            return byteArrayToHexString(hashBytes);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // Helper method to convert a byte array to a hex string
