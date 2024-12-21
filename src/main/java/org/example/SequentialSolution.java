@@ -22,6 +22,7 @@ public class SequentialSolution {
     };
     public static String nonAlphaString = new String(nonAlphabeticalCharacters);
 
+    // Can I offer you a static method in these trying times
 
     public static String computeDizShiz(String hash, boolean md5, int opt, int length, JProgressBar progressBar, long totalCombinations) {
         String available = getCharacterSet(opt);
@@ -93,6 +94,7 @@ public class SequentialSolution {
                 progressBar.setString(currentProgress[0] + "/" + totalCombinations);
             });
 
+            // Forgive me Vicic for i have sinned
             String result = findMatchingPermutationSHAHelper(hash, str, prefix + str.charAt(i), maxLength, progressBar, totalCombinations, currentProgress);
             if (result != null) {
                 return result; // Early stopping
@@ -139,6 +141,7 @@ public class SequentialSolution {
                 progressBar.setString(currentProgress[0] + "/" + totalCombinations);
             });
 
+            // I apologise for NOTHING
             String result = findMatchingPermutationMDHelper(hash, str, prefix + str.charAt(i), maxLength, progressBar, totalCombinations, currentProgress);
             if (result != null) {
                 return result; // Early stopping
