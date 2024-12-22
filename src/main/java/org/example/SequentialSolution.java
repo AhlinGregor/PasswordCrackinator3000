@@ -20,7 +20,7 @@ public class SequentialSolution {
             ';', ':', '\'', '\"', ',', '<', '.', '>', '/', '?', // Punctuation
             '`', '~'                                           // Miscellaneous
     };
-    public static String nonAlphaString = new String(nonAlphabeticalCharacters);
+    private final static String nonAlphaString = new String(nonAlphabeticalCharacters);
 
     // Can I offer you a static method in these trying times
 
@@ -46,7 +46,7 @@ public class SequentialSolution {
     public static long calculateTotalCombinations(int charsetLength, int maxLength) {
         long total = 0;
         for (int i = 1; i <= maxLength; i++) {
-            total += Math.pow(charsetLength, i);
+            total += (long) Math.pow(charsetLength, i);
         }
         return total;
     }
@@ -150,7 +150,7 @@ public class SequentialSolution {
         return null;
     }
 
-    public static boolean isValidMD5(String input) {
+    private static boolean isValidMD5(String input) {
         if (input == null || input.length() != 32) {
             return false;
         }

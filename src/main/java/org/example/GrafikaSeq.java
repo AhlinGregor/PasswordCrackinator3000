@@ -9,7 +9,7 @@ public class GrafikaSeq {
         // Create the main frame
         JFrame frame = new JFrame("GrafikaSeq GUI");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(400, 200);
+        frame.setSize(500, 200);
 
         // Create a panel to hold all components
         JPanel panel = new JPanel();
@@ -58,7 +58,7 @@ public class GrafikaSeq {
         progressBar.setStringPainted(true);
 
         // Add a button
-        JButton button = new JButton("Submit");
+        JButton button = new JButton("Brute force");
         button.addActionListener(e -> {
             progressBar.setValue(0); // Reset progress bar
 
