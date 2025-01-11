@@ -44,11 +44,8 @@ public class SequentialSolution {
     }
 
     public static long calculateTotalCombinations(int charsetLength, int maxLength) {
-        long total = 0;
-        for (int i = 1; i <= maxLength; i++) {
-            total += (long) Math.pow(charsetLength, i);
-        }
-        return total;
+
+        return (long) Math.pow(charsetLength, maxLength);
     }
 
     private static String findMatchingPermutationSHA(String hash, String available, int maxLength, JProgressBar progressBar, long totalCombinations) {
@@ -57,7 +54,13 @@ public class SequentialSolution {
 
     private static String findMatchingPermutationSHAHelper(String hash, String str, String prefix, int maxLength, JProgressBar progressBar, long totalCombinations, long[] currentProgress) {
         // Base case: Check if prefix matches the hash
-        if (!prefix.isEmpty() && prefix.length() <= maxLength) {
+        if (prefix.length() == maxLength) {
+            currentProgress[0]++;
+            SwingUtilities.invokeLater(() -> {
+                progressBar.setValue((int) currentProgress[0]);
+                progressBar.setString(currentProgress[0] + "/" + totalCombinations);
+            });
+
             try {
                 MessageDigest md = MessageDigest.getInstance("SHA-256");
                 byte[] digest = md.digest(prefix.getBytes(StandardCharsets.UTF_8));
@@ -88,11 +91,6 @@ public class SequentialSolution {
 
         // Recursive case: Generate permutations dynamically
         for (int i = 0; i < str.length(); i++) {
-            currentProgress[0]++;
-            SwingUtilities.invokeLater(() -> {
-                progressBar.setValue((int) currentProgress[0]);
-                progressBar.setString(currentProgress[0] + "/" + totalCombinations);
-            });
 
             // Forgive me Vicic for i have sinned
             String result = findMatchingPermutationSHAHelper(hash, str, prefix + str.charAt(i), maxLength, progressBar, totalCombinations, currentProgress);
@@ -109,7 +107,13 @@ public class SequentialSolution {
 
     private static String findMatchingPermutationMDHelper(String hash, String str, String prefix, int maxLength, JProgressBar progressBar, long totalCombinations, long[] currentProgress) {
         // Base case: Check if prefix matches the hash
-        if (!prefix.isEmpty() && prefix.length() <= maxLength) {
+        if (prefix.length() == maxLength) {
+            currentProgress[0]++;
+            SwingUtilities.invokeLater(() -> {
+                progressBar.setValue((int) currentProgress[0]);
+                progressBar.setString(currentProgress[0] + "/" + totalCombinations);
+            });
+
             try {
                 MessageDigest md = MessageDigest.getInstance("MD5");
                 byte[] digest = md.digest(prefix.getBytes(StandardCharsets.UTF_8));
@@ -135,11 +139,6 @@ public class SequentialSolution {
 
         // Recursive case: Generate permutations dynamically
         for (int i = 0; i < str.length(); i++) {
-            currentProgress[0]++;
-            SwingUtilities.invokeLater(() -> {
-                progressBar.setValue((int) currentProgress[0]);
-                progressBar.setString(currentProgress[0] + "/" + totalCombinations);
-            });
 
             // I apologise for NOTHING
             String result = findMatchingPermutationMDHelper(hash, str, prefix + str.charAt(i), maxLength, progressBar, totalCombinations, currentProgress);
