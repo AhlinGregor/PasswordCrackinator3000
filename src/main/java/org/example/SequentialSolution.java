@@ -5,10 +5,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
+import java.util.Stack;
 
 public class SequentialSolution {
     private final static String smallAlpha = "abcdefghijklmnopqrstuvwxyz";
@@ -20,10 +20,20 @@ public class SequentialSolution {
             ';', ':', '\'', '\"', ',', '<', '.', '>', '/', '?', // Punctuation
             '`', '~'                                           // Miscellaneous
     };
-    private final static String nonAlphaString = new String(nonAlphabeticalCharacters);
+    private final static String nonAlpha = new String(nonAlphabeticalCharacters);
 
     // Can I offer you a static method in these trying times
 
+    /**
+     * Method to decide if we're computing an MD5 or an SHA-256 hash
+     * @param hash Password hash given as a user input
+     * @param md5 Is password hashed via MD5
+     * @param opt Options for lowercase, uppercase and special characters (including numbers)
+     * @param length Length of the password
+     * @param progressBar Progress bar component to dynamically update the progress bar while trying hashes
+     * @param totalCombinations The total number of combinations possible with the given character set
+     * @return  A password that if hashed with the correct algorithm will return the parameter "hash" or null if the password is not found
+     */
     public static String computeDizShiz(String hash, boolean md5, int opt, int length, JProgressBar progressBar, long totalCombinations) {
         String available = getCharacterSet(opt);
         if (md5) {
@@ -39,116 +49,126 @@ public class SequentialSolution {
         }
     }
 
+    /**
+     * Method to validate if the hash is in line with the SHA-256 requirements
+     * @param input User-given hash
+     * @return true if it is a valid hash, false otherwise
+     */
     private static boolean isValidSHA(String input) {
         return input != null && input.matches("^[a-fA-F0-9]{64}$"); //"Yayy! Regex!" said he, sarcastically
     }
 
+    /**
+     * Method that calculates all possible combinations for a given length and charset
+     * @param charsetLength All possible characters
+     * @param maxLength The password length
+     * @return a long integer that represents the number of possible -combinations
+     */
     public static long calculateTotalCombinations(int charsetLength, int maxLength) {
 
         return (long) Math.pow(charsetLength, maxLength);
     }
 
+    /**
+     * Method for generating all possible SHA-256 hashes within the given restrictions
+     * @param hash User given input
+     * @param available String of available characters
+     * @param maxLength Length of password
+     * @param progressBar Component to update
+     * @param totalCombinations Number of total combinations (purely for progress bar functionality
+     * @return either cracked password or null if not found
+     */
     private static String findMatchingPermutationSHA(String hash, String available, int maxLength, JProgressBar progressBar, long totalCombinations) {
-        return findMatchingPermutationSHAHelper(hash, available, "", maxLength, progressBar, totalCombinations, new long[]{0});
-    }
+        long[] currentProgress = {0};           // Zaporedno stevilo preizkusov
+        Stack<String> stack = new Stack<>();    // A stack of password pancakes
+        stack.push("");
 
-    private static String findMatchingPermutationSHAHelper(String hash, String str, String prefix, int maxLength, JProgressBar progressBar, long totalCombinations, long[] currentProgress) {
-        // Base case: Check if prefix matches the hash
-        if (prefix.length() == maxLength) {
-            currentProgress[0]++;
-            SwingUtilities.invokeLater(() -> {
-                progressBar.setValue((int) currentProgress[0]);
-                progressBar.setString(currentProgress[0] + "/" + totalCombinations);
-            });
+        while (!stack.isEmpty()) {
+            String prefix = stack.pop();
 
-            try {
-                MessageDigest md = MessageDigest.getInstance("SHA-256");
-                byte[] digest = md.digest(prefix.getBytes(StandardCharsets.UTF_8));
-                StringBuilder sb = new StringBuilder();
-                for (byte b : digest) {
-                    //sb.append(String.format("%02x", b));
-                    String hex = Integer.toHexString(0xff & b);
-                    if (hex.length() == 1) {
-                        sb.append('0');
-                    }
-                    sb.append(hex);
-                }
-                if (sb.toString().equals(hash)) {
-                    progressBar.setValue((int) currentProgress[0]); // If success set pb to 100%
+            // Check if the current permutation has reached the desired length
+            if (prefix.length() == maxLength) {
+                currentProgress[0]++;           // Update progress
+                SwingUtilities.invokeLater(() -> {
+                    progressBar.setValue((int) currentProgress[0]);
+                    progressBar.setString(currentProgress[0] + "/" + totalCombinations);
+                });
+
+                // Dobimo hash
+                String computedHash = computeSHA256Hash(prefix);
+
+                if (computedHash.equalsIgnoreCase(hash)) {
+                    // naredi zadnji update pbja in vrni rezultat
+                    progressBar.setValue((int) currentProgress[0]); // Final update
                     progressBar.setString(currentProgress[0] + "/" + totalCombinations);
                     return prefix;
                 }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
             }
 
-        }
-
-        // Stop recursion if prefix length exceeds maxLength
-        if (prefix.length() >= maxLength) {
-            return null;
-        }
-
-        // Recursive case: Generate permutations dynamically
-        for (int i = 0; i < str.length(); i++) {
-
-            // Forgive me Vicic for i have sinned
-            String result = findMatchingPermutationSHAHelper(hash, str, prefix + str.charAt(i), maxLength, progressBar, totalCombinations, currentProgress);
-            if (result != null) {
-                return result; // Early stopping
+            // If the prefix length is less than maxLength, generate new permutations
+            if (prefix.length() < maxLength) {
+                for (int i = 0; i < available.length(); i++) {
+                    stack.push(prefix + available.charAt(i));
+                }
             }
         }
+
+        // No match found
         return null;
     }
 
+    /**
+     * Method for generating all possible MD5 hashes within the given restrictions
+     * @param hash User given input
+     * @param available String of available characters
+     * @param maxLength Length of password
+     * @param progressBar Component to update
+     * @param totalCombinations Number of total combinations (purely for progress bar functionality
+     * @return either cracked password or null if not found
+     */
     private static String findMatchingPermutationMD(String hash, String available, int maxLength, JProgressBar progressBar, long totalCombinations) {
-        return findMatchingPermutationMDHelper(hash, available, "", maxLength, progressBar, totalCombinations, new long[]{0});
-    }
+        long[] currentProgress = {0};
+        Stack<String> stack = new Stack<>();
+        stack.push("");
 
-    private static String findMatchingPermutationMDHelper(String hash, String str, String prefix, int maxLength, JProgressBar progressBar, long totalCombinations, long[] currentProgress) {
-        // Base case: Check if prefix matches the hash
-        if (prefix.length() == maxLength) {
-            currentProgress[0]++;
-            SwingUtilities.invokeLater(() -> {
-                progressBar.setValue((int) currentProgress[0]);
-                progressBar.setString(currentProgress[0] + "/" + totalCombinations);
-            });
+        while (!stack.isEmpty()) {
+            String prefix = stack.pop();
 
-            try {
-                MessageDigest md = MessageDigest.getInstance("MD5");
-                byte[] digest = md.digest(prefix.getBytes(StandardCharsets.UTF_8));
-                StringBuilder sb = new StringBuilder();
-                for (byte b : digest) {
-                    sb.append(String.format("%02x", b));
-                }
-                if (sb.toString().equals(hash)) {
-                    progressBar.setValue((int) currentProgress[0]); // If success set pb to 100%
+            // Check if the current permutation has reached the desired length
+            if (prefix.length() == maxLength) {
+                currentProgress[0]++;
+                SwingUtilities.invokeLater(() -> {
+                    progressBar.setValue((int) currentProgress[0]);
+                    progressBar.setString(currentProgress[0] + "/" + totalCombinations);
+                });
+
+                String computedHash = computeMD5Hash(prefix);
+
+                if (computedHash.equalsIgnoreCase(hash)) {
+                    // Early stopping: Return the matching permutation
+                    progressBar.setValue((int) currentProgress[0]); // Final update
                     progressBar.setString(currentProgress[0] + "/" + totalCombinations);
                     return prefix;
                 }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
             }
 
-        }
-
-        // Stop recursion if prefix length exceeds maxLength
-        if (prefix.length() >= maxLength) {
-            return null;
-        }
-
-        // Recursive case: Generate permutations dynamically
-        for (int i = 0; i < str.length(); i++) {
-
-            // I apologise for NOTHING
-            String result = findMatchingPermutationMDHelper(hash, str, prefix + str.charAt(i), maxLength, progressBar, totalCombinations, currentProgress);
-            if (result != null) {
-                return result; // Early stopping
+            // If the prefix length is less than maxLength, generate new permutations
+            if (prefix.length() < maxLength) {
+                for (int i = 0; i < available.length(); i++) {
+                    stack.push(prefix + available.charAt(i));
+                }
             }
         }
+
+        // No match found
         return null;
     }
 
+    /**
+     * Method to validate if the hash is in line with the MD5 requirements
+     * @param input User-given hash
+     * @return true if it is a valid hash, false otherwise
+     */
     private static boolean isValidMD5(String input) {
         if (input == null || input.length() != 32) {
             return false;
@@ -157,17 +177,24 @@ public class SequentialSolution {
         return input.matches("[a-fA-F0-9]{32}"); // The bane of my existence yet again
     }
 
+    /**
+     * Method to preform a dictionary attack
+     * @param file Dictionary file in .txt format
+     * @param hash User given hash
+     * @param md5 Is password hashed via MD5
+     * @return String representing a password or null if password is not in the dictionary file
+     */
     public static String dictionaryAttack(File file, String hash, boolean md5) {
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = reader.readLine()) != null) {
+                String lineHash;
                 if (md5) {
-                    String lineHash = computeMD5Hash(line);
-                    if (lineHash.equals(hash)) return line;
+                    lineHash = computeMD5Hash(line);
                 } else {
-                    String lineHash = computeSHA256Hash(line);
-                    if (lineHash.equals(hash)) return line;
+                    lineHash = computeSHA256Hash(line);
                 }
+                if (lineHash.equals(hash)) return line;
             }
         } catch (IOException ex) {
             System.err.println("Error reading the file: " + ex.getMessage());
@@ -175,6 +202,11 @@ public class SequentialSolution {
         return null;
     }
 
+    /**
+     * Method to generate the SHA-256 hash
+     * @param input String we want to hash
+     * @return String representation of a hash
+     */
     private static String computeSHA256Hash(String input) {
         MessageDigest md;
         try {
@@ -186,7 +218,11 @@ public class SequentialSolution {
         }
     }
 
-    // Helper method to convert a byte array to a hex string
+    /**
+     * Helper method to convert a byte array to a hex String
+     * @param bytes Array of bytes we want to convert
+     * @return Hex String representation of the array
+     */
     private static String byteArrayToHexString(byte[] bytes) {
         Formatter formatter = new Formatter();
         for (byte b : bytes) {
@@ -197,7 +233,11 @@ public class SequentialSolution {
         return hexString;
     }
 
-    // Helper method to compute the MD5 hash of a given string
+    /**
+     * Method to generate the MD5 hash
+     * @param input String we want to hash
+     * @return String representation of a hash
+     */
     private static String computeMD5Hash(String input) {
         MessageDigest md;
         try {
@@ -209,15 +249,20 @@ public class SequentialSolution {
         }
     }
 
+    /**
+     * Method that generates a character set of available character as specified by the user
+     * @param opt Integer representation of options
+     * @return A String with all possible characters
+     */
     public static String getCharacterSet(int opt) {
         return switch (opt) {
             case 1 -> SequentialSolution.smallAlpha;
             case 2 -> SequentialSolution.bigAlpha;
             case 3 -> SequentialSolution.smallAlpha + SequentialSolution.bigAlpha;
-            case 4 -> SequentialSolution.nonAlphaString;
-            case 5 -> SequentialSolution.smallAlpha + SequentialSolution.nonAlphaString;
-            case 6 -> SequentialSolution.bigAlpha + SequentialSolution.nonAlphaString;
-            default -> SequentialSolution.smallAlpha + SequentialSolution.bigAlpha + SequentialSolution.nonAlphaString;
+            case 4 -> SequentialSolution.nonAlpha;
+            case 5 -> SequentialSolution.smallAlpha + SequentialSolution.nonAlpha;
+            case 6 -> SequentialSolution.bigAlpha + SequentialSolution.nonAlpha;
+            default -> SequentialSolution.smallAlpha + SequentialSolution.bigAlpha + SequentialSolution.nonAlpha;
         };
     }
 }
