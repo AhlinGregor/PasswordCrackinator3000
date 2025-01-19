@@ -27,25 +27,26 @@ public class SequentialSolution {
     /**
      * Method to decide if we're computing an MD5 or an SHA-256 hash
      * @param hash Password hash given as a user input
-     * @param md5 Is password hashed via MD5
      * @param opt Options for lowercase, uppercase and special characters (including numbers)
      * @param length Length of the password
      * @param progressBar Progress bar component to dynamically update the progress bar while trying hashes
      * @param totalCombinations The total number of combinations possible with the given character set
      * @return  A password that if hashed with the correct algorithm will return the parameter "hash" or null if the password is not found
      */
-    public static String computeDizShiz(String hash, boolean md5, int opt, int length, JProgressBar progressBar, long totalCombinations) {
+    public static String computeDizShiz(String hash, int opt, int length, JProgressBar progressBar, long totalCombinations) {
         String available = getCharacterSet(opt);
-        if (md5) {
-            if (!isValidMD5(hash)) return null;
+        if (isValidMD5(hash)) {
+            //if (!isValidMD5(hash)) return null;
 
             // Big daddy method for md5
             return findMatchingPermutationMD(hash, available, length, progressBar, totalCombinations);
-        } else {
-            if (!isValidSHA(hash)) return null;
+        } else if (isValidSHA(hash)) {
+            //if (!isValidSHA(hash)) return null;
 
             // Big daddy method for sha-256
             return findMatchingPermutationSHA(hash, available, length, progressBar, totalCombinations);
+        } else {
+            return null;
         }
     }
 
@@ -181,18 +182,19 @@ public class SequentialSolution {
      * Method to preform a dictionary attack
      * @param file Dictionary file in .txt format
      * @param hash User given hash
-     * @param md5 Is password hashed via MD5
      * @return String representing a password or null if password is not in the dictionary file
      */
-    public static String dictionaryAttack(File file, String hash, boolean md5) {
+    public static String dictionaryAttack(File file, String hash) {
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String lineHash;
-                if (md5) {
+                if (isValidMD5(hash)) {
                     lineHash = computeMD5Hash(line);
-                } else {
+                } else if (isValidSHA(hash)) {
                     lineHash = computeSHA256Hash(line);
+                } else {
+                    return null;
                 }
                 if (lineHash.equals(hash)) return line;
             }

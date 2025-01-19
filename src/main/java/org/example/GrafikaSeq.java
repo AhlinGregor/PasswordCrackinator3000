@@ -20,18 +20,18 @@ public class GrafikaSeq {
         panel.add(new JLabel("Enter text:"));
         panel.add(textField);
 
-        // Add radio buttons
-        JRadioButton md5 = new JRadioButton("MD-5");
-        JRadioButton sha = new JRadioButton("SHA-256");
-        ButtonGroup radioGroup = new ButtonGroup(); // Group the radio buttons
-        radioGroup.add(md5);
-        radioGroup.add(sha);
-
-        JPanel radioPanel = new JPanel();
-        radioPanel.add(md5);
-        radioPanel.add(sha);
-        panel.add(new JLabel("Select an option:"));
-        panel.add(radioPanel);
+//        // Add radio buttons
+//        JRadioButton md5 = new JRadioButton("MD-5");
+//        JRadioButton sha = new JRadioButton("SHA-256");
+//        ButtonGroup radioGroup = new ButtonGroup(); // Group the radio buttons
+//        radioGroup.add(md5);
+//        radioGroup.add(sha);
+//
+//        JPanel radioPanel = new JPanel();
+//        radioPanel.add(md5);
+//        radioPanel.add(sha);
+//        panel.add(new JLabel("Select an option:"));
+//        panel.add(radioPanel);
 
         // Add checkboxes
         JCheckBox small = new JCheckBox("a-z");
@@ -64,7 +64,6 @@ public class GrafikaSeq {
 
             new Thread(() -> {
                 String hash = textField.getText();
-                boolean md5Selected = md5.isSelected();
                 int selectedCheckboxes = (small.isSelected() ? 1 : 0) + (big.isSelected() ? 2 : 0) + (nonAlpha.isSelected() ? 4 : 0);
                 int selectedInteger = (int) spinner.getValue();
 
@@ -79,7 +78,6 @@ public class GrafikaSeq {
                 long start = System.currentTimeMillis();
                 String result = SequentialSolution.computeDizShiz(
                         hash,
-                        md5Selected,
                         selectedCheckboxes,
                         selectedInteger,
                         progressBar,
@@ -115,7 +113,7 @@ public class GrafikaSeq {
             String hash = textField.getText();
 
             // Get selected radio button
-            boolean md5Selected = md5.isSelected();
+            //boolean md5Selected = md5.isSelected();
 
             JFileChooser fileChooser = new JFileChooser();
             int result = fileChooser.showOpenDialog(panel);
@@ -128,8 +126,7 @@ public class GrafikaSeq {
                     long start = System.currentTimeMillis();
                     String resitev = SequentialSolution.dictionaryAttack(
                             file,
-                            hash,
-                            md5Selected
+                            hash
                     );
                     long stop = System.currentTimeMillis();
 
