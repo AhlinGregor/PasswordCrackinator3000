@@ -15,7 +15,8 @@ public class Main {
                 cudaSollution();
                 break;
         }*/
-        GrafikaSeq.createAndShowGUI();
+        // GrafikaSeq.createAndShowGUI();
+        GrafikaMulti.createAndShowGUI();
 
     }
 /*

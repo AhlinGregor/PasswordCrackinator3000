@@ -56,15 +56,15 @@ public class GrafikaMulti {
                 int selectedInteger = (int) spinner.getValue();
 
                 // Calculate total combinations
-                String available = SequentialSolution.getCharacterSet(selectedCheckboxes);
-                long totalCombinations = SequentialSolution.calculateTotalCombinations(available.length(), selectedInteger);
+                String available = MultithreadedSolution.getCharacterSet(selectedCheckboxes);
+                long totalCombinations = MultithreadedSolution.calculateTotalCombinations(available.length(), selectedInteger);
 
                 // Update progress bar's text format
                 progressBar.setStringPainted(true);
                 progressBar.setMaximum((int) totalCombinations);
 
                 long start = System.currentTimeMillis();
-                String result = SequentialSolution.computeDizShiz(
+                String result = MultithreadedSolution.computeDizShiz(
                         hash,
                         selectedCheckboxes,
                         selectedInteger,
@@ -112,7 +112,7 @@ public class GrafikaMulti {
                 // Check if it's a .txt file
                 if (file.getName().endsWith(".txt")) {
                     long start = System.currentTimeMillis();
-                    String resitev = SequentialSolution.dictionaryAttack(
+                    String resitev = MultithreadedSolution.dictionaryAttack(
                             file,
                             hash
                     );
