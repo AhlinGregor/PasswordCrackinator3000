@@ -88,43 +88,80 @@ public class MultithreadedSolution {
      * @return either cracked password or null if not found
      */
     private static String findMatchingPermutationSHA(String hash, String available, int maxLength, JProgressBar progressBar, long totalCombinations) {
-        long[] currentProgress = {0};           // Zaporedno stevilo preizkusov
-        Stack<String> stack = new Stack<>();    // A stack of password pancakes
-        stack.push("");
+        AtomicLong currentProgress = new AtomicLong(0);
+        AtomicReference<String> result = new AtomicReference<>(null);
+        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        AtomicLong lastUIUpdateTime = new AtomicLong(System.currentTimeMillis());
+        final int UI_UPDATE_STEP = 1000; // update every 1000 steps or 100ms
+
+        BlockingQueue<String> queue = new LinkedBlockingQueue<>();
+        queue.offer(""); // Start with empty prefix
+
+        AtomicInteger activeTasks = new AtomicInteger(1); // Start with 1 for the initial ""
+        int threadCount = Runtime.getRuntime().availableProcessors();
+
+        Runnable worker = () -> {
+            try {
+                while (true) {
+                    if (result.get() != null && activeTasks.get() == 0) return;
+
+                    String prefix = queue.poll(100, TimeUnit.MILLISECONDS);
+                    if (prefix == null) {
+                        if (activeTasks.get() == 0) return;
+                        continue;
+                    }
+
+                    if (prefix.length() == maxLength) {
+                        String computedHash = computeSHA256Hash(prefix);
+                        long progress = currentProgress.incrementAndGet();
+                        long now = System.currentTimeMillis();
+
+                        if (progress % UI_UPDATE_STEP == 0 || (now - lastUIUpdateTime.get()) > 100) {
+                            lastUIUpdateTime.set(now);
+                            SwingUtilities.invokeLater(() -> {
+                                progressBar.setValue((int) progress);
+                                progressBar.setString(progress + "/" + totalCombinations);
+                            });
+                        }
 
 
-        while (!stack.isEmpty()) {
-            String prefix = stack.pop();
+                        if (computedHash.equalsIgnoreCase(hash)) {
+                            result.compareAndSet(null, prefix);
+                        }
 
-            // Check if the current permutation has reached the desired length
-            if (prefix.length() == maxLength) {
-                currentProgress[0]++;           // Update progress
-                SwingUtilities.invokeLater(() -> {
-                    progressBar.setValue((int) currentProgress[0]);
-                    progressBar.setString(currentProgress[0] + "/" + totalCombinations);
-                });
+                    } else {
+                        for (int i = 0; i < available.length(); i++) {
+                            String newPrefix = prefix + available.charAt(i);
+                            queue.offer(newPrefix);
+                            activeTasks.incrementAndGet();
+                        }
+                    }
 
-                // Dobimo hash
-                String computedHash = computeSHA256Hash(prefix);
-
-                if (computedHash.equalsIgnoreCase(hash)) {
-                    // naredi zadnji update pbja in vrni rezultat
-                    progressBar.setValue((int) currentProgress[0]); // Final update
-                    progressBar.setString(currentProgress[0] + "/" + totalCombinations);
-                    return prefix;
+                    activeTasks.decrementAndGet();
                 }
-            }
+            } catch (InterruptedException ignored) {}
+        };
 
-            // If the prefix length is less than maxLength, generate new permutations
-            if (prefix.length() < maxLength) {
-                for (int i = 0; i < available.length(); i++) {
-                    stack.push(prefix + available.charAt(i));
-                }
+        // Start workers
+        for (int i = 0; i < threadCount; i++) {
+            executor.submit(worker);
+        }
+
+        // Wait for result or exhaustion
+        while (result.get() == null && (activeTasks.get() > 0 || !queue.isEmpty())) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                break;
             }
         }
 
-        // No match found
-        return null;
+        executor.shutdownNow();
+        SwingUtilities.invokeLater(() -> {
+            progressBar.setValue((int) currentProgress.get());
+            progressBar.setString(currentProgress.get() + "/" + totalCombinations);
+        });
+        return result.get();
     }
 
     /**
@@ -254,20 +291,24 @@ public class MultithreadedSolution {
         return null;
     }
 
+    private static final ThreadLocal<MessageDigest> sha256DigestThreadLocal = ThreadLocal.withInitial(() -> {
+        try {
+            return MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    });
+
     /**
      * Method to generate the SHA-256 hash
      * @param input String we want to hash
      * @return String representation of a hash
      */
     private static String computeSHA256Hash(String input) {
-        MessageDigest md;
-        try {
-            md = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = md.digest(input.getBytes());
-            return byteArrayToHexString(hashBytes);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+        MessageDigest md = sha256DigestThreadLocal.get();
+        md.reset();
+        byte[] hashBytes = md.digest(input.getBytes(StandardCharsets.UTF_8));
+        return byteArrayToHexString(hashBytes);
     }
 
     /**

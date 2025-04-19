@@ -9,6 +9,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
 import java.util.Stack;
+import java.util.Queue;
+import java.util.LinkedList;
 
 public class SequentialSolution {
     private final static String smallAlpha = "abcdefghijklmnopqrstuvwxyz";
@@ -129,11 +131,11 @@ public class SequentialSolution {
      */
     private static String findMatchingPermutationMD(String hash, String available, int maxLength, JProgressBar progressBar, long totalCombinations) {
         long[] currentProgress = {0};
-        Stack<String> stack = new Stack<>();
-        stack.push("");
+        Queue<String> queue = new LinkedList<>();
+        queue.offer("");
 
-        while (!stack.isEmpty()) {
-            String prefix = stack.pop();
+        while (!queue.isEmpty()) {
+            String prefix = queue.poll();
 
             // Check if the current permutation has reached the desired length
             if (prefix.length() == maxLength) {
@@ -156,7 +158,7 @@ public class SequentialSolution {
             // If the prefix length is less than maxLength, generate new permutations
             if (prefix.length() < maxLength) {
                 for (int i = 0; i < available.length(); i++) {
-                    stack.push(prefix + available.charAt(i));
+                    queue.offer(prefix + available.charAt(i));
                 }
             }
         }
