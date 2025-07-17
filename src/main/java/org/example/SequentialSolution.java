@@ -123,7 +123,7 @@ public class SequentialSolution {
      * @param hash User given input
      * @param available String of available characters
      * @param maxLength Length of password
-     * @param progressBar Component to update
+     * @param progressBar Progress bar component to update
      * @param totalCombinations Number of total combinations (purely for progress bar functionality
      * @return either cracked password or null if not found
      */
