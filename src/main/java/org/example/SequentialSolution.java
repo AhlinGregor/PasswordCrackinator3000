@@ -1,5 +1,4 @@
 package org.example;
-
 import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.File;
@@ -9,12 +8,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
 import java.util.Stack;
-import java.util.Queue;
-import java.util.LinkedList;
 
 public class SequentialSolution {
-    private final static String smallAlpha = "abcdefghijklmnopqrstuvwxyz";
-    private final static String bigAlpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private final static String smallAlpha = "zyxwvutsrqponmlkjihgfedcba";
+    private final static String bigAlpha = "ZYXWVUTSRQPONMLKJIHGFEDCBA";
     private final static char[] nonAlphabeticalCharacters = {
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',  // Digits
             '!', '@', '#', '$', '%', '^', '&', '*', '(', ')',   // Symbols
@@ -98,6 +95,7 @@ public class SequentialSolution {
                 });
 
                 // Dobimo hash
+                // System.out.println(prefix);
                 String computedHash = computeSHA256Hash(prefix);
 
                 if (computedHash.equalsIgnoreCase(hash)) {
@@ -131,11 +129,11 @@ public class SequentialSolution {
      */
     private static String findMatchingPermutationMD(String hash, String available, int maxLength, JProgressBar progressBar, long totalCombinations) {
         long[] currentProgress = {0};
-        Queue<String> queue = new LinkedList<>();
-        queue.offer("");
+        Stack<String> stack = new Stack<>();
+        stack.push("");
 
-        while (!queue.isEmpty()) {
-            String prefix = queue.poll();
+        while (!stack.isEmpty()) {
+            String prefix = stack.pop();
 
             // Check if the current permutation has reached the desired length
             if (prefix.length() == maxLength) {
@@ -145,6 +143,7 @@ public class SequentialSolution {
                     progressBar.setString(currentProgress[0] + "/" + totalCombinations);
                 });
 
+                // System.out.println(prefix);
                 String computedHash = computeMD5Hash(prefix);
 
                 if (computedHash.equalsIgnoreCase(hash)) {
@@ -158,7 +157,7 @@ public class SequentialSolution {
             // If the prefix length is less than maxLength, generate new permutations
             if (prefix.length() < maxLength) {
                 for (int i = 0; i < available.length(); i++) {
-                    queue.offer(prefix + available.charAt(i));
+                    stack.push(prefix + available.charAt(i));
                 }
             }
         }

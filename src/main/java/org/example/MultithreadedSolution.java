@@ -1,5 +1,4 @@
 package org.example;
-
 import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.File;
@@ -9,15 +8,14 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
-import java.util.Stack;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class MultithreadedSolution {
-    private final static String smallAlpha = "abcdefghijklmnopqrstuvwxyz";
-    private final static String bigAlpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private final static String smallAlpha = "zyxwvutsrqponmlkjihgfedcba";
+    private final static String bigAlpha = "ZYXWVUTSRQPONMLKJIHGFEDCBA";
     private final static char[] nonAlphabeticalCharacters = {
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',  // Digits
             '!', '@', '#', '$', '%', '^', '&', '*', '(', ')',   // Symbols
@@ -88,28 +86,30 @@ public class MultithreadedSolution {
      * @return either cracked password or null if not found
      */
     private static String findMatchingPermutationSHA(String hash, String available, int maxLength, JProgressBar progressBar, long totalCombinations) {
+        final boolean[] stopRequested = {false};
         AtomicLong currentProgress = new AtomicLong(0);
         AtomicReference<String> result = new AtomicReference<>(null);
         ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         AtomicLong lastUIUpdateTime = new AtomicLong(System.currentTimeMillis());
         final int UI_UPDATE_STEP = 1000; // update every 1000 steps or 100ms
 
-        BlockingQueue<String> queue = new LinkedBlockingQueue<>();
-        queue.offer(""); // Start with empty prefix
+        // BlockingQueue<String> queue = new LinkedBlockingQueue<>();
+        LinkedBlockingDeque<String> stack = new LinkedBlockingDeque<>();
+        stack.push(""); // Start with empty prefix
 
         AtomicInteger activeTasks = new AtomicInteger(1); // Start with 1 for the initial ""
         int threadCount = Runtime.getRuntime().availableProcessors();
 
         Runnable worker = () -> {
             try {
-                while (true) {
+                while (!stopRequested[0]) {
                     if (result.get() != null && activeTasks.get() == 0) return;
 
-                    String prefix = queue.poll(100, TimeUnit.MILLISECONDS);
-                    if (prefix == null) {
-                        if (activeTasks.get() == 0) return;
-                        continue;
-                    }
+                    String prefix = stack.take();
+                    // if (prefix == null) {
+                    //     if (activeTasks.get() == 0) return;
+                    //     continue;
+                    // }
 
                     if (prefix.length() == maxLength) {
                         String computedHash = computeSHA256Hash(prefix);
@@ -126,13 +126,14 @@ public class MultithreadedSolution {
 
 
                         if (computedHash.equalsIgnoreCase(hash)) {
+                            stopRequested[0] = true;
                             result.compareAndSet(null, prefix);
                         }
 
                     } else {
                         for (int i = 0; i < available.length(); i++) {
                             String newPrefix = prefix + available.charAt(i);
-                            queue.offer(newPrefix);
+                            stack.push(newPrefix);
                             activeTasks.incrementAndGet();
                         }
                     }
@@ -148,7 +149,7 @@ public class MultithreadedSolution {
         }
 
         // Wait for result or exhaustion
-        while (result.get() == null && (activeTasks.get() > 0 || !queue.isEmpty())) {
+        while (result.get() == null && (activeTasks.get() > 0 || !stack.isEmpty())) {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -175,29 +176,33 @@ public class MultithreadedSolution {
      */
     private static String findMatchingPermutationMD(String hash, String available, int maxLength, JProgressBar progressBar, long totalCombinations) {
         AtomicLong currentProgress = new AtomicLong(0);
+        final boolean[] stopRequested = {false};
         AtomicReference<String> result = new AtomicReference<>(null);
         ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         AtomicLong lastUIUpdateTime = new AtomicLong(System.currentTimeMillis());
         final int UI_UPDATE_STEP = 1000; // update every 1000 steps or 100ms
 
-        BlockingQueue<String> queue = new LinkedBlockingQueue<>();
-        queue.offer(""); // Start with empty prefix
+        // BlockingQueue<String> queue = new LinkedBlockingQueue<>();
+        LinkedBlockingDeque<String> stack = new LinkedBlockingDeque<>();
+        stack.push(""); // Start with empty prefix
 
         AtomicInteger activeTasks = new AtomicInteger(1); // Start with 1 for the initial ""
         int threadCount = Runtime.getRuntime().availableProcessors();
 
         Runnable worker = () -> {
             try {
-                while (true) {
+                while (!stopRequested[0]) {
                     if (result.get() != null && activeTasks.get() == 0) return;
 
-                    String prefix = queue.poll(100, TimeUnit.MILLISECONDS);
-                    if (prefix == null) {
-                        if (activeTasks.get() == 0) return;
-                        continue;
-                    }
+                    // String prefix = queue.poll(100, TimeUnit.MILLISECONDS);
+                    String prefix = stack.take();
+                    // if (prefix == null) {
+                    //     if (activeTasks.get() == 0) return;
+                    //     continue;
+                    // }
 
                     if (prefix.length() == maxLength) {
+                        // System.out.println(prefix);
                         String computedHash = computeMD5Hash(prefix);
                         long progress = currentProgress.incrementAndGet();
                         long now = System.currentTimeMillis();
@@ -213,12 +218,13 @@ public class MultithreadedSolution {
 
                         if (computedHash.equalsIgnoreCase(hash)) {
                             result.compareAndSet(null, prefix);
+                            stopRequested[0] = true;
                         }
 
                     } else {
                         for (int i = 0; i < available.length(); i++) {
                             String newPrefix = prefix + available.charAt(i);
-                            queue.offer(newPrefix);
+                            stack.push(newPrefix);
                             activeTasks.incrementAndGet();
                         }
                     }
@@ -234,7 +240,7 @@ public class MultithreadedSolution {
         }
 
         // Wait for result or exhaustion
-        while (result.get() == null && (activeTasks.get() > 0 || !queue.isEmpty())) {
+        while (result.get() == null || (activeTasks.get() > 0 || !stack.isEmpty())) {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
