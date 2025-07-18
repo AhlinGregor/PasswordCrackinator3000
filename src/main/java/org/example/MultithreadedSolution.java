@@ -126,8 +126,8 @@ public class MultithreadedSolution {
 
 
                         if (computedHash.equalsIgnoreCase(hash)) {
-                            stopRequested[0] = true;
                             result.compareAndSet(null, prefix);
+                            stopRequested[0] = true;
                         }
 
                     } else {
