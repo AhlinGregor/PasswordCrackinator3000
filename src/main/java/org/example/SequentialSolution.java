@@ -185,10 +185,17 @@ public class SequentialSolution {
      * @param hash User given hash
      * @return String representing a password or null if password is not in the dictionary file
      */
-    public static String dictionaryAttack(File file, String hash) {
+    public static String dictionaryAttack(File file, String hash, JProgressBar progressBar) {
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            long[] currentProgress = {0};
             String line;
+            int totalLines = countLines(file);
             while ((line = reader.readLine()) != null) {
+                currentProgress[0]++;
+                SwingUtilities.invokeLater(() -> {
+                    progressBar.setValue((int) currentProgress[0]);
+                    progressBar.setString(currentProgress[0] + "/" + totalLines);
+                });
                 String lineHash;
                 if (isValidMD5(hash)) {
                     lineHash = computeMD5Hash(line);
@@ -197,12 +204,27 @@ public class SequentialSolution {
                 } else {
                     return null;
                 }
-                if (lineHash.equals(hash)) return line;
+                if (lineHash.equals(hash)) {
+                    progressBar.setValue((int) currentProgress[0]); // Final update
+                    progressBar.setString(currentProgress[0] + "/" + totalLines);
+                    return line;
+                }
             }
         } catch (IOException ex) {
             System.err.println("Error reading the file: " + ex.getMessage());
         }
         return null;
+    }
+
+
+    private static int countLines(File file) throws IOException {
+        int lines = 0;
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            while (reader.readLine() != null) {
+                lines++;
+            }
+        }
+        return lines;
     }
 
     /**

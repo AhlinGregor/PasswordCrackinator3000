@@ -130,7 +130,7 @@ public class GrafikaMulti {
                         } else {
                             JOptionPane.showMessageDialog(
                                     frame,
-                                    "No solution was found.",
+                                    "No solution was found. Time: " + (stop-start) + "ms.",
                                     "Result",
                                     JOptionPane.WARNING_MESSAGE
                             );

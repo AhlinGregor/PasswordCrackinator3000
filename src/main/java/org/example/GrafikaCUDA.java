@@ -4,10 +4,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 
-public class GrafikaSeq {
+public class GrafikaCUDA {
+
     public static void createAndShowGUI() {
         // Create the main frame
-        JFrame frame = new JFrame("GrafikaSeq GUI");
+        JFrame frame = new JFrame("GrafikaCUDA GUI");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(500, 200);
 
@@ -19,19 +20,6 @@ public class GrafikaSeq {
         JTextField textField = new JTextField(20);
         panel.add(new JLabel("Enter text:"));
         panel.add(textField);
-
-//        // Add radio buttons
-//        JRadioButton md5 = new JRadioButton("MD-5");
-//        JRadioButton sha = new JRadioButton("SHA-256");
-//        ButtonGroup radioGroup = new ButtonGroup(); // Group the radio buttons
-//        radioGroup.add(md5);
-//        radioGroup.add(sha);
-//
-//        JPanel radioPanel = new JPanel();
-//        radioPanel.add(md5);
-//        radioPanel.add(sha);
-//        panel.add(new JLabel("Select an option:"));
-//        panel.add(radioPanel);
 
         // Add checkboxes
         JCheckBox small = new JCheckBox("a-z");
@@ -68,20 +56,18 @@ public class GrafikaSeq {
                 int selectedInteger = (int) spinner.getValue();
 
                 // Calculate total combinations
-                String available = SequentialSolution.getCharacterSet(selectedCheckboxes);
-                long totalCombinations = SequentialSolution.calculateTotalCombinations(available.length(), selectedInteger);
+                String available = CUDASolution.getCharacterSet(selectedCheckboxes);
+                long totalCombinations = CUDASolution.calculateTotalCombinations(available.length(), selectedInteger);
 
                 // Update progress bar's text format
                 progressBar.setStringPainted(true);
                 progressBar.setMaximum((int) totalCombinations);
 
                 long start = System.currentTimeMillis();
-                String result = SequentialSolution.computeDizShiz(
+                String result = CUDASolution.computeDizShiz(
                         hash,
                         selectedCheckboxes,
-                        selectedInteger,
-                        progressBar,
-                        totalCombinations
+                        selectedInteger
                 );
                 long stop = System.currentTimeMillis();
 
@@ -97,7 +83,7 @@ public class GrafikaSeq {
                     } else {
                         JOptionPane.showMessageDialog(
                                 frame,
-                                "No solution was found. Time: " + (stop-start) + "ms",
+                                "No solution was found.",
                                 "Result",
                                 JOptionPane.WARNING_MESSAGE
                         );
@@ -143,7 +129,7 @@ public class GrafikaSeq {
                         } else {
                             JOptionPane.showMessageDialog(
                                     frame,
-                                    "No solution was found. Time: " + (stop-start) + "ms.",
+                                    "No solution was found.",
                                     "Result",
                                     JOptionPane.WARNING_MESSAGE
                             );

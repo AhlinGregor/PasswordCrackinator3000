@@ -15,14 +15,9 @@ public class Main {
                 cudaSollution();
                 break;
         }*/
-        // GrafikaSeq.createAndShowGUI();
-        GrafikaMulti.createAndShowGUI();
+        GrafikaSeq.createAndShowGUI();
+        // GrafikaMulti.createAndShowGUI();
+        // GrafikaCUDA.createAndShowGUI();
 
     }
-/*
-    public static void sequentialSollution() {
-        GrafikaSeq.createAndShowGUI();
-    }
-    public static void parallelSollution() {}
-    public static void cudaSollution() {}*/
 }
