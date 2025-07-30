@@ -78,14 +78,14 @@ public class GrafikaMulti {
                     if (result != null) {
                         JOptionPane.showMessageDialog(
                                 frame,
-                                "Solution Found: " + result + "\n Time to crack: " + (stop-start) + "ms",
+                                "Solution Found: " + result + "\n Time to crack: " + (stop-start) + "ms.",
                                 "Result",
                                 JOptionPane.INFORMATION_MESSAGE
                         );
                     } else {
                         JOptionPane.showMessageDialog(
                                 frame,
-                                "No solution was found.",
+                                "No solution was found. Time: " + (stop-start) + "ms.",
                                 "Result",
                                 JOptionPane.WARNING_MESSAGE
                         );
@@ -123,7 +123,7 @@ public class GrafikaMulti {
                         if (resitev != null) {
                             JOptionPane.showMessageDialog(
                                     frame,
-                                    "Solution Found: " + resitev + "\n Time to crack: " + (stop-start) + "ms",
+                                    "Solution Found: " + resitev + "\n Time to crack: " + (stop-start) + "ms.",
                                     "Result",
                                     JOptionPane.INFORMATION_MESSAGE
                             );

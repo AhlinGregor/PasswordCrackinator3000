@@ -90,14 +90,14 @@ public class GrafikaSeq {
                     if (result != null) {
                         JOptionPane.showMessageDialog(
                                 frame,
-                                "Solution Found: " + result + "\n Time to crack: " + (stop-start) + "ms",
+                                "Solution Found: " + result + "\n Time to crack: " + (stop-start) + "ms.",
                                 "Result",
                                 JOptionPane.INFORMATION_MESSAGE
                         );
                     } else {
                         JOptionPane.showMessageDialog(
                                 frame,
-                                "No solution was found. Time: " + (stop-start) + "ms",
+                                "No solution was found. Time: " + (stop-start) + "ms.",
                                 "Result",
                                 JOptionPane.WARNING_MESSAGE
                         );
@@ -136,7 +136,7 @@ public class GrafikaSeq {
                         if (resitev != null) {
                             JOptionPane.showMessageDialog(
                                     frame,
-                                    "Solution Found: " + resitev + "\n Time to crack: " + (stop-start) + "ms",
+                                    "Solution Found: " + resitev + "\n Time to crack: " + (stop-start) + "ms.",
                                     "Result",
                                     JOptionPane.INFORMATION_MESSAGE
                             );

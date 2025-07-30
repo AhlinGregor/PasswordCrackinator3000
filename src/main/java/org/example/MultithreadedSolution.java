@@ -240,7 +240,7 @@ public class MultithreadedSolution {
         }
 
         // Wait for result or exhaustion
-        while (result.get() == null || (activeTasks.get() > 0 || !stack.isEmpty())) {
+        while (result.get() == null && (activeTasks.get() > 0 || !stack.isEmpty())) {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {

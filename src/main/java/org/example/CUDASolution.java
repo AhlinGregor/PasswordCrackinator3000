@@ -3,20 +3,10 @@ package org.example;
 
 public class CUDASolution {
     static {
-        System.loadLibrary("cudaHasher");
+        System.load("D:/FAKS/Prog3/PasswordCrackinator3000/build/Release/cudaHasher.dll");
     }
 
-    // JNI method: charset, password length, hash
-
-    /**
-     * JNI method
-     * @param charset string of available characters
-     * @param length length of password
-     * @param targetHash hash we are trying to crack
-     * @param hashMode 0 if hash is md5, 1 if sha256
-     * @return the password that matches the hash of null if none is found
-     */
-    public native String nativeBruteForce(String charset, int length, byte[] targetHash, int hashMode);
+    public static native String nativeBruteForce(String charset, int length, byte[] hashBytes, int mode);
 
     private final static String smallAlpha = "zyxwvutsrqponmlkjihgfedcba";
     private final static String bigAlpha = "ZYXWVUTSRQPONMLKJIHGFEDCBA";
@@ -37,22 +27,11 @@ public class CUDASolution {
      * @return  A password that if hashed with the correct algorithm will return the parameter "hash" or null if the password is not found
      */
     public static String computeDizShiz(String hash, int opt, int length) {
-        String available = getCharacterSet(opt);
-        if (isValidMD5(hash)) {
-
-            // return findMatchingPermutationMD(available, length, hash);
-            byte[] target = hexToBytes(hash);
-            String found = new CUDASolution().nativeBruteForce(available, length, target, 1);
-            return found;
-        } else if (isValidSHA(hash)) {
-
-            // return findMatchingPermutationSHA(available, length, hash);
-            byte[] target = hexToBytes(hash);
-            String found = new CUDASolution().nativeBruteForce(available, length, target, 0);
-            return found;
-        } else {
-            return null;
-        }
+        String charset = getCharacterSet(opt);
+        byte[] target = hexToBytes(hash);
+        int mode = isValidMD5(hash) ? 0 : isValidSHA(hash) ? 1 : -1;
+        if (mode < 0) return null;
+        return new CUDASolution().nativeBruteForce(charset, length, target, mode);
     }
 
 //    private static String findMatchingPermutationSHA(String charset, int length, String targetHash) {
