@@ -5,3 +5,28 @@ It implements 3 solutions:
   - cuda accelerated solution
 
 Currently the program runs only the sequential version but at the release stage you will run the program from command line and will choose the version with the arguments (1 being sequential, 2 parallel and 3 cuda).
+
+## Requirements
+- Java JDK 17+
+- Nvidia GPU with CUDA support if you want to run the 3D accelerated version
+- CUDA tooklit (11.x or newer)
+- CMake 3.18+
+- Visual Studio 2019+ (Windows) or GCC/Clang on Linux
+- Intellij IDEA (not required but reccomended)
+
+- ## Build instructions
+Before running the project you first need to build it. Regardles of if you've generated a new JNI header or are using the one provided run the following commands in x64 Native Tools from the project root folder.
+
+```bash
+mkdir build
+cmake -S . -B build
+cmake --build build --config Release
+```
+
+## Generating a new JNI header **(OPTIONAL)**
+The JNI header is already provided however if you change anything in the CUDASolution.java it is smart to generate it again. To do so run the command
+
+```bash
+javac -h . src/main/java/org/example/CUDASolution.java
+```
+from the root directory with x64 Native Tools Command Prompt for VS.
