@@ -23,7 +23,7 @@ cmake -S . -B build
 cmake --build build --config Release
 ```
 
-## Generating a new JNI header
+## Generating a new JNI header **(OPTIONAL)**
 The JNI header is already provided however if you change anything in the CUDASolution.java it is smart to generate it again. To do so run the command
 
 ```bash
