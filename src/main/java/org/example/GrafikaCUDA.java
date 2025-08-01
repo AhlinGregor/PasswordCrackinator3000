@@ -74,6 +74,7 @@ public class GrafikaCUDA {
                 // Show the result in a new window
                 SwingUtilities.invokeLater(() -> {
                     if (result != null) {
+                        System.out.println("Solution Found: " + result + "\n Time to crack: " + (stop-start) + "ms.");
                         JOptionPane.showMessageDialog(
                                 frame,
                                 "Solution Found: " + result + "\n Time to crack: " + (stop-start) + "ms.",
@@ -81,6 +82,7 @@ public class GrafikaCUDA {
                                 JOptionPane.INFORMATION_MESSAGE
                         );
                     } else {
+                        System.out.println("No solution was found. Time: " + (stop-start) + "ms.");
                         JOptionPane.showMessageDialog(
                                 frame,
                                 "No solution was found. Time: " + (stop-start) + "ms.",
@@ -120,6 +122,7 @@ public class GrafikaCUDA {
                     // Show the result in a new window
                     SwingUtilities.invokeLater(() -> {
                         if (resitev != null) {
+                            System.out.println("Solution Found: " + resitev + "\n Time to crack: " + (stop-start) + "ms.");
                             JOptionPane.showMessageDialog(
                                     frame,
                                     "Solution Found: " + resitev + "\n Time to crack: " + (stop-start) + "ms.",
@@ -127,6 +130,7 @@ public class GrafikaCUDA {
                                     JOptionPane.INFORMATION_MESSAGE
                             );
                         } else {
+                            System.out.println("No solution was found. Time: " + (stop-start) + "ms.");
                             JOptionPane.showMessageDialog(
                                     frame,
                                     "No solution was found. Time: " + (stop-start) + "ms.",
