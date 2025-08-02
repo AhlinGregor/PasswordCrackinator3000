@@ -96,14 +96,14 @@ public class CUDASolution {
      * @return A String with all possible characters
      */
     public static String getCharacterSet(int opt) {
-        return switch (opt) {
-            case 1 -> CUDASolution.smallAlpha;
-            case 2 -> CUDASolution.bigAlpha;
-            case 3 -> CUDASolution.smallAlpha + CUDASolution.bigAlpha;
-            case 4 -> CUDASolution.nonAlpha;
-            case 5 -> CUDASolution.smallAlpha + CUDASolution.nonAlpha;
-            case 6 -> CUDASolution.bigAlpha + CUDASolution.nonAlpha;
-            default -> CUDASolution.smallAlpha + CUDASolution.bigAlpha + CUDASolution.nonAlpha;
-        };
+        switch (opt) {
+            case 1 : return CUDASolution.smallAlpha;
+            case 2 : return CUDASolution.bigAlpha;
+            case 3 : return CUDASolution.smallAlpha + CUDASolution.bigAlpha;
+            case 4 : return CUDASolution.nonAlpha;
+            case 5 : return CUDASolution.smallAlpha + CUDASolution.nonAlpha;
+            case 6 : return CUDASolution.bigAlpha + CUDASolution.nonAlpha;
+            default : return CUDASolution.smallAlpha + CUDASolution.bigAlpha + CUDASolution.nonAlpha;
+        }
     }
 }

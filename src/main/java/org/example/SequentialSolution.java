@@ -280,14 +280,14 @@ public class SequentialSolution {
      * @return A String with all possible characters
      */
     public static String getCharacterSet(int opt) {
-        return switch (opt) {
-            case 1 -> SequentialSolution.smallAlpha;
-            case 2 -> SequentialSolution.bigAlpha;
-            case 3 -> SequentialSolution.smallAlpha + SequentialSolution.bigAlpha;
-            case 4 -> SequentialSolution.nonAlpha;
-            case 5 -> SequentialSolution.smallAlpha + SequentialSolution.nonAlpha;
-            case 6 -> SequentialSolution.bigAlpha + SequentialSolution.nonAlpha;
-            default -> SequentialSolution.smallAlpha + SequentialSolution.bigAlpha + SequentialSolution.nonAlpha;
-        };
+        switch (opt) {
+            case 1 : return SequentialSolution.smallAlpha;
+            case 2 : return SequentialSolution.bigAlpha;
+            case 3 : return SequentialSolution.smallAlpha + SequentialSolution.bigAlpha;
+            case 4 : return SequentialSolution.nonAlpha;
+            case 5 : return SequentialSolution.smallAlpha + SequentialSolution.nonAlpha;
+            case 6 : return SequentialSolution.bigAlpha + SequentialSolution.nonAlpha;
+            default : return SequentialSolution.smallAlpha + SequentialSolution.bigAlpha + SequentialSolution.nonAlpha;
+        }
     }
 }

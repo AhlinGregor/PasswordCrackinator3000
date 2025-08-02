@@ -358,14 +358,14 @@ public class MultithreadedSolution {
      * @return A String with all possible characters
      */
     public static String getCharacterSet(int opt) {
-        return switch (opt) {
-            case 1 -> MultithreadedSolution.smallAlpha;
-            case 2 -> MultithreadedSolution.bigAlpha;
-            case 3 -> MultithreadedSolution.smallAlpha + MultithreadedSolution.bigAlpha;
-            case 4 -> MultithreadedSolution.nonAlpha;
-            case 5 -> MultithreadedSolution.smallAlpha + MultithreadedSolution.nonAlpha;
-            case 6 -> MultithreadedSolution.bigAlpha + MultithreadedSolution.nonAlpha;
-            default -> MultithreadedSolution.smallAlpha + MultithreadedSolution.bigAlpha + MultithreadedSolution.nonAlpha;
-        };
+        switch (opt) {
+            case 1 : return MultithreadedSolution.smallAlpha;
+            case 2 : return MultithreadedSolution.bigAlpha;
+            case 3 : return MultithreadedSolution.smallAlpha + MultithreadedSolution.bigAlpha;
+            case 4 : return MultithreadedSolution.nonAlpha;
+            case 5 : return MultithreadedSolution.smallAlpha + MultithreadedSolution.nonAlpha;
+            case 6 : return MultithreadedSolution.bigAlpha + MultithreadedSolution.nonAlpha;
+            default : return MultithreadedSolution.smallAlpha + MultithreadedSolution.bigAlpha + MultithreadedSolution.nonAlpha;
+        }
     }
 }
