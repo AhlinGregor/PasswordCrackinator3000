@@ -1,9 +1,27 @@
 package org.example;
 
 
+import java.io.File;
+
 public class CUDASolution {
     static {
-        System.load("D:/FAKS/Prog3/PasswordCrackinator3000/build/Release/cudaHasher.dll");
+        try {
+            String os = System.getProperty("os.name").toLowerCase();
+
+            if (os.contains("win")) {
+                System.load(new File("native/windows/cudaHasher.dll").getAbsolutePath());
+            } else if (os.contains("mac")) {
+                System.load(new File("native/mac/cudaHasher.dylib").getAbsolutePath());
+            } else {
+                System.load(new File("native/linux/cudaHasher.so").getAbsolutePath());
+            }
+
+            System.out.println("Native CUDA library loaded successfully");
+
+        } catch (Throwable e) {
+            System.err.println("Failed to load native CUDA library. Falling back to CPU.");
+            e.printStackTrace();
+        }
     }
 
     public static native String nativeBruteForce(String charset, int length, byte[] hashBytes, int mode);
